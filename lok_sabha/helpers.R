@@ -102,7 +102,7 @@ most_pop_words <- words %>%
   group_by(word) %>% 
   summarise(n = sum(likes)) %>% 
   arrange(desc(n)) %>% 
-  top_n(60) 
+  top_n(120) 
 
 senti <- get_nrc_sentiment(most_pop_words$word)
 
@@ -124,10 +124,27 @@ most_pop_words <- most_pop_words %>%
 # natural produced tibble and compare with the changes I make. Feel free to
 # contact me to challenge any of my interpretations.
 
-# write_csv(most_pop_words, "most-pop.csv")
+# write_csv(most_pop_words, "temp.csv")
 
 most_pop_words <- read_csv("most-pop.csv", col_names = TRUE) %>% 
-  select(word, n, positive, negative)
+  select(word, n, positive, negative) %>% 
+  gather(key = "sentiment", value = "sent_n", positive:negative) %>% 
+  filter(sent_n == 1) %>% 
+  mutate(new_var = ifelse(sentiment == "negative", -n/1000000, n/1000000))
+
+p_word_senti <- most_pop_words %>% 
+  ggplot(aes(reorder(word, new_var), new_var, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  geom_hline(yintercept = 0, colour = "black", size = 0.3) +
+  geom_vline(xintercept = 14.5, colour = "black", linetype = "dotted") +
+  labs(
+    y = "Popularity: Favourites + Retweets (in millions)",
+    x = NULL,
+    title = "Most Popular Negative and Postive Words on #Chowkidar",
+    subtitle = "From 108,000 Popular and Recent Tweets from 20 March, 2019"
+    ) +
+  theme_minimal()
 
 # Generate wordcloud
 wordcloud(most_pop_words$word, most_pop_words$n, colors=brewer.pal(8, "Dark2"), color, max.words = 60)
