@@ -1,7 +1,15 @@
 # Packages----
-library(shiny)
-library(shinythemes)
-library(shinyjs)
+`%!in%` = Negate(`%in%`)
+
+# Load packages at once
+packages <- c(
+  "tidyverse", "leaflet", "tidycensus", "mapview", "sf", "tmap", "tmaptools", 
+  "tigris", "ggplot2", "viridis", "ggthemes", "gganimate", "gifski", "shinycssloaders", 
+  "transformr", "shinythemes", "lubridate", "shinythemes", "rtweet", "janitor", "tidyr",
+  "tidytext", "readr", "wordcloud", "tm", "syuzhet", "gt", "shiny", "shinythemes", "shinyjs"
+)
+lapply(packages, require, character.only = TRUE)
+
 source("helpers.R")
 
 
@@ -72,7 +80,7 @@ ui <-
       theme = shinytheme("darkly"),
       windowTitle = "Indian Elections Analysis"
     )
-  )
+  ))
 
 
 
