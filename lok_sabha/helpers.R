@@ -136,7 +136,7 @@ most_pop_words <- read_csv("most-pop.csv", col_names = TRUE) %>%
   filter(sent_n == 1) %>% 
   mutate(new_var = ifelse(sentiment == "negative", -n/1000000, n/1000000))
 
-p_word_senti <- most_pop_words %>% 
+p_word_senti = most_pop_words %>% 
   ggplot(aes(reorder(word, new_var), new_var, fill = sentiment)) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
@@ -152,7 +152,8 @@ p_word_senti <- most_pop_words %>%
 
 # Generate wordcloud
 # 2 Worlcloud-------------------------
-p_wordcloud <- wordcloud(
+
+wordcloud(
   wordcloud_df$word,
   wordcloud_df$n,
   colors = brewer.pal(8, "Dark2"),
@@ -160,4 +161,3 @@ p_wordcloud <- wordcloud(
   random.order = FALSE,
   max.words = 100
 )
-
