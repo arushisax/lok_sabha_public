@@ -147,4 +147,12 @@ p_word_senti <- most_pop_words %>%
   theme_minimal()
 
 # Generate wordcloud
-wordcloud(most_pop_words$word, most_pop_words$n, colors=brewer.pal(8, "Dark2"), color, max.words = 60)
+p_wordcloud <- wordcloud(
+  most_pop_words$word,
+  most_pop_words$n,
+  colors = brewer.pal(8, "Dark2"),
+  random.color = FALSE,
+  random.order = FALSE,
+  max.words = 100
+)
+
