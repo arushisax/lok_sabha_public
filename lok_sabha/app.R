@@ -83,13 +83,17 @@ server <- function(input, output) {
   # 1 Ouput About---------
   output$about <- renderText({"demo"})
   output$wordcloud <- renderImage({
-    list(src = "wordcloud.png",
-         contentType = 'png'
+    list(src = "static/wordcloud.png",
+         contentType = 'image/png',
+         width = 400,
+         height = 300
          )
   })
   output$popular_words <- renderImage({
-    list(src = "popular_words.png",
-         contentType = 'png'
+    list(src = "static/popular_words.png",
+         contentType = 'image/png',
+         width = 400,
+         height = 300
     )
   })
 }
