@@ -13,7 +13,10 @@ packages <- c(
   )
 lapply(packages, require, character.only = TRUE)
 # 2 Data preprocessing------------------------
-orig <- read_csv("lok_sabha/twitter_data.csv", col_names = TRUE)
+orig <- read_csv("twitter_data.csv", col_names = TRUE)
+
+# FOR RUNNING THE STATIC
+# Modify to orig <- read_csv("lok_sabha/twitter_data.csv", col_names = TRUE)
 
 # Duplicate tibble in case I mess up the data
 x <- orig
@@ -114,26 +117,6 @@ most_pop_words <- most_pop_words %>%
 
 wordcloud_df <- most_pop_words
 
-# NOTE
-# syuzhet does not work for Hindi words. Though I only downloaded tweets in
-# English, it's a common practice to write Hindi tweets using English
-# characters. So, I'm intervening in the tibble here: this is unconventional and
-# perhaps even inappropriate but in the absence of a ML library of any kind to
-# perform sentiment analysis on Hindi words, this is the best bet to maintain
-# the tradeoff between being objective and representing the reality of the
-# political climate. So, you can run the code till here and check out the
-# natural produced tibble and compare with the changes I make. Feel free to
-# contact me to challenge any of my interpretations.
 
-# write_csv(most_pop_words, "temp.csv")
-# Word graph
-
-# Rewrite most_pop_words
-
-most_pop_words <- read_csv("most-pop.csv", col_names = TRUE) %>% 
-  select(word, n, positive, negative) %>% 
-  gather(key = "sentiment", value = "sent_n", positive:negative) %>% 
-  filter(sent_n == 1) %>% 
-  mutate(new_var = ifelse(sentiment == "negative", -n/1000000, n/1000000))
 
 

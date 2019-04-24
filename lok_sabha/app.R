@@ -2,12 +2,7 @@
 `%!in%` = Negate(`%in%`)
 
 # Load packages at once
-packages <- c(
-  "tidyverse", "leaflet", "tidycensus", "mapview", "sf", "tmap", "tmaptools", 
-  "tigris", "ggplot2", "viridis", "ggthemes", "gganimate", "gifski", "shinycssloaders", 
-  "transformr", "shinythemes", "lubridate", "shinythemes", "rtweet", "janitor", "tidyr",
-  "tidytext", "readr", "wordcloud", "tm", "syuzhet", "gt", "shiny", "shinythemes", "shinyjs"
-)
+packages <- c("shiny", "shinythemes", "shinyjs", "shinycssloaders")
 lapply(packages, require, character.only = TRUE)
 
 source("helpers.R")
@@ -18,6 +13,10 @@ ui <-
   shinyUI(
     navbarPage(
       "Twitter in the Biggest Election in the World",
+      inverse = TRUE,
+      collapsible = TRUE,
+      theme = shinytheme("darkly"),
+      windowTitle = "Indian Elections Analysis",
       # TAB 1: About--------------------------
       tabPanel("About",
                mainPanel(
@@ -43,7 +42,7 @@ ui <-
                           mainPanel(
                             tabsetPanel(
                               tabPanel("The Most Tweeted Words",
-                                       withSpinner(plotOutput("wordcloud"), type = 4)
+                                       withSpinner(imageOutput("wordcloud"), type = 4)
                                        )
                               )
                           )
@@ -64,28 +63,18 @@ ui <-
                           mainPanel(
                             tabsetPanel(
                               tabPanel("Popular Positive and Negative Words",
-                                       withSpinner(plotOutput("p_word_senti"), type = 4)
+                                       withSpinner(imageOutput("popular_words"), type = 4)
                               )
                             )
                           )
-                          ),
+                          )
                  
       # TAB 3: --------------------------
       
       # TAB 4: --------------------------
       
-      # Remaining UI-------
-      inverse = TRUE,
-      collapsible = TRUE,
-      theme = shinytheme("darkly"),
-      windowTitle = "Indian Elections Analysis"
     )
   ))
-
-
-
-
-
 
 
 # SERVER-------------   
@@ -93,8 +82,15 @@ ui <-
 server <- function(input, output) {
   # 1 Ouput About---------
   output$about <- renderText({"demo"})
-  output$wordcloud <- renderPlot({
-    
+  output$wordcloud <- renderImage({
+    list(src = "wordcloud.png",
+         contentType = 'png'
+         )
+  })
+  output$popular_words <- renderImage({
+    list(src = "popular_words.png",
+         contentType = 'png'
+    )
   })
 }
 
