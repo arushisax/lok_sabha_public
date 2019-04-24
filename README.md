@@ -11,7 +11,7 @@ Link:
 #### 3: Bots & IT Cells -- Analysis of Fake Tweets
 
 #### Technical Details
-This project is written in R and it's UI is built with R`Shiny` to be interactive and reactive. I use `rtweet` to scrape twitter data (more on `rtweet` here: https://rtweet.info/) and use the `nrc` dictionary to perform sentiment analysis (more on `nrc` here: https://www.rdocumentation.org/packages/syuzhet/versions/1.0.4/topics/get_nrc_sentiment). Aside of some geospatial analysis and mapping tools, a large part of the core functionality of this project is built in `dplyr` and `ggplot2`.  
+This project is written in R and it's UI is built with R`Shiny` to be interactive and reactive. I use `rtweet` to scrape twitter data (more on `rtweet` here: https://rtweet.info/) and use `syuzhet` to perform sentiment analysis (more on `syuzhet` here: https://www.rdocumentation.org/packages/syuzhet/versions/1.0.4/topics/get_nrc_sentiment). Aside of some geospatial analysis and mapping tools, a large part of the core functionality of this project is built in `dplyr` and `ggplot2`.  
 
 ### Note on the Data
 There are two data files:
