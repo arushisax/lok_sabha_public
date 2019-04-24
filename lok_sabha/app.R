@@ -1,30 +1,40 @@
+# Packages----
 library(shiny)
 library(shinythemes)
-source("helpers.R")
-
+library(shinyjs)
+# source("helpers.R")
+# UI-----
 ui <-
-  navbarPage(title = "2019 Indian Parliamentary Elections: Analysis",
-             value = "home",
-             footer = "Built by Hemanth Bharatha Chakravarthy. hemanthbharathachakravarthy@college.harvard.edu",
-             inverse = TRUE,
-             collapsible = TRUE,
-             theme = shinytheme("sandstone"),
-             windowTitle = "Indian Elections Analysis")
+  shinyUI(
+    navbarPage(
+      "The Biggest Election in the World",
+      # TAB 1: About--------------------------
+      tabPanel("About",
+               mainPanel(
+                 h1("2019 Indian Parliamentary Elections: Analysis"),
+                 htmlOutput("about")
+               )),
+      # TAB 2: --------------------------
+      
+      # TAB 3: --------------------------
+      
+      # TAB 3: --------------------------
+      
+      # Remaining UI-------
+      inverse = TRUE,
+      collapsible = TRUE,
+      theme = shinytheme("darkly"),
+      windowTitle = "Indian Elections Analysis"
+    )
+  )
 
-    
+# SERVER-------------   
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-   
-   output$distPlot <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- faithful[, 2] 
-      bins <- seq(min(x), max(x), length.out = input$bins + 1)
-      
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
-   })
+  # 1 Ouput About---------
+  output$about <- renderText({"demo"})
 }
 
-# Run the application 
+# Run the application--------
 shinyApp(ui = ui, server = server)
 
