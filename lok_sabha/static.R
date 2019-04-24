@@ -53,5 +53,4 @@ wordcloud(
   max.words = 100
 )
 dev.off()
-
 # This generates wordcloud.png
