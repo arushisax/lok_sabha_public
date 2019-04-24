@@ -1,5 +1,6 @@
-# 1: PREPROCESSING
+# A: PREPROCESSING
 
+# 1 Preprocessing----------------------- 
 # I like to use this function
 `%!in%` = Negate(`%in%`)
 
@@ -11,14 +12,12 @@ packages <- c(
   "tidytext", "readr", "wordcloud", "tm", "syuzhet", "gt"
   )
 lapply(packages, require, character.only = TRUE)
-
-# Data preprocessing
+# 2 Data preprocessing------------------------
 orig <- read_csv("twitter_data.csv", col_names = TRUE)
 
 # Duplicate tibble in case I mess up the data
 x <- orig
-
-# Text preprocessing
+# 3 Text preprocessing------------------------
 temp <- x %>%
   # Lose useless columns
   select(
@@ -113,6 +112,7 @@ most_pop_words <- most_pop_words %>%
   left_join(senti, by = "ID") %>% 
   select(-ID)
 
+wordcloud_df <- most_pop_words
 # NOTE
 # syuzhet does not work for Hindi words. Though I only downloaded tweets in
 # English, it's a common practice to write Hindi tweets using English
@@ -125,7 +125,11 @@ most_pop_words <- most_pop_words %>%
 # contact me to challenge any of my interpretations.
 
 # write_csv(most_pop_words, "temp.csv")
+# Word graph
 
+# B: PLOTS
+
+# 1 Words Plot-----------------------
 most_pop_words <- read_csv("most-pop.csv", col_names = TRUE) %>% 
   select(word, n, positive, negative) %>% 
   gather(key = "sentiment", value = "sent_n", positive:negative) %>% 
@@ -147,11 +151,12 @@ p_word_senti <- most_pop_words %>%
   theme_minimal()
 
 # Generate wordcloud
+# 2 Worlcloud-------------------------
 p_wordcloud <- wordcloud(
-  most_pop_words$word,
-  most_pop_words$n,
+  wordcloud_df$word,
+  wordcloud_df$n,
   colors = brewer.pal(8, "Dark2"),
-  random.color = FALSE,
+  random.color = TRUE,
   random.order = FALSE,
   max.words = 100
 )
