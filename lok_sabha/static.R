@@ -43,7 +43,7 @@ most_pop_words %>%
 ggsave("lok_sabha/popular_words.png", plot = last_plot())
 # Generate wordcloud
 # 2 Worlcloud-------------------------
-
+png("wordcloud.png")
 wordcloud(
   wordcloud_df$word,
   wordcloud_df$n,
@@ -52,5 +52,6 @@ wordcloud(
   random.order = FALSE,
   max.words = 100
 )
+div.off()
 
 # This generates wordcloud.png
