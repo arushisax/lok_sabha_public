@@ -1,28 +1,17 @@
 library(shiny)
+library(shinythemes)
+source("helpers.R")
 
+ui <-
+  navbarPage(title = "2019 Indian Parliamentary Elections: Analysis",
+             value = "home",
+             footer = "Built by Hemanth Bharatha Chakravarthy. hemanthbharathachakravarthy@college.harvard.edu",
+             inverse = TRUE,
+             collapsible = TRUE,
+             theme = shinytheme("sandstone"),
+             windowTitle = "Indian Elections Analysis")
 
-ui <- fluidPage(
-   
-   # Application title
-   titlePanel("Old Faithful Geyser Data"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-      sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
-      ),
-      
-      # Show a plot of the generated distribution
-      mainPanel(
-         plotOutput("distPlot")
-      )
-   )
-)
-
+    
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    

@@ -13,7 +13,7 @@ packages <- c(
 lapply(packages, require, character.only = TRUE)
 
 # Data preprocessing
-orig <- read_csv("lok_sabha/twitter_data.csv", col_names = TRUE)
+orig <- read_csv("twitter_data.csv", col_names = TRUE)
 
 # Duplicate tibble in case I mess up the data
 x <- orig
