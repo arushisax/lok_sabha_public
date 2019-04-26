@@ -2,8 +2,9 @@
 `%!in%` = Negate(`%in%`)
 
 # Load packages at once
-packages <- c("shiny", "shinythemes", "shinyjs", "shinycssloaders")
-lapply(packages, require, character.only = TRUE)
+library(easypackages)
+libraries("shiny", "shinythemes", "shinyjs", "shinycssloaders")
+# lapply(packages, require, character.only = TRUE)
 
 source("helpers.R")
 
@@ -67,26 +68,26 @@ ui <-
                               )
                             )
                           )
-                          ),
+                          )
                  
       # TAB 3: --------------------------
-      tabPanel("Sentiments: Summary",
-               sidebarPanel(
-                 helpText(
-                   "This analyzes a mixed sample of 108,000 most popular
-                              and most recent tweets collected from Twitter on 20 March, 2019, 
-                              that tweeted about the BJP's #MainBhiChowkidar ('I am a guard 
-                              of the nation') campaign. This measures the positive and negative sentiments about the Modi-led BJP's #Chowkidar Campaign."
-                 )
-               ),
-               mainPanel(
-                 tabsetPanel(
-                   tabPanel("Sentiments: Summary",
-                            withSpinner(tableOutput("senti_summary"), type = 4)
-                   )
-                 )
-               )
-      )
+      # tabPanel("Sentiments: Summary",
+      #          sidebarPanel(
+      #            helpText(
+      #              "This analyzes a mixed sample of 108,000 most popular
+      #                         and most recent tweets collected from Twitter on 20 March, 2019, 
+      #                         that tweeted about the BJP's #MainBhiChowkidar ('I am a guard 
+      #                         of the nation') campaign. This measures the positive and negative sentiments about the Modi-led BJP's #Chowkidar Campaign."
+      #            )
+      #          ),
+      #          mainPanel(
+      #            tabsetPanel(
+      #              tabPanel("Sentiments: Summary",
+      #                       withSpinner(tableOutput("senti_summary"), type = 4)
+      #              )
+      #            )
+      #          )
+      # )
       # TAB 4: --------------------------
       
     )
@@ -110,7 +111,7 @@ server <- function(input, output) {
     list(src = "static/wordcloud.png",
          contentType = 'image/png',
          width = 400,
-         height = 300
+         height = 400
          )
   })
   # 3 OUTPUT popular words-----
@@ -118,24 +119,24 @@ server <- function(input, output) {
     list(src = "static/popular_words.png",
          contentType = 'image/png',
          width = 400,
-         height = 300
+         height = 400
     )
   })
-  # 4 OUTPUT Sentiment analysis----
-  output$senti_summary <- renderTable({
-  tbl %>% 
-    select(Sentiment, Percentage) %>% 
-    gt() %>%  
-    fmt_percent(
-      columns = vars("Percentage")
-    ) %>% 
-    tab_header(
-      title = "Sentiment Analysis of Tweets About the #Chowkidar Campaign",
-      subtitle = "Analyzing a Mixed Sample of 108,000 of the Most Popular and Most Recent Tweets"
-    ) %>%
-    # Cite the data source
-    tab_source_note(source_note = "Data from Twitter")
-  })
+  # # 4 OUTPUT Sentiment analysis----
+  # output$senti_summary <- renderTable({
+  # tbl %>% 
+  #   select(Sentiment, Percentage) %>% 
+  #   gt() %>%  
+  #   fmt_percent(
+  #     columns = vars("Percentage")
+  #   ) %>% 
+  #   tab_header(
+  #     title = "Sentiment Analysis of Tweets About the #Chowkidar Campaign",
+  #     subtitle = "Analyzing a Mixed Sample of 108,000 of the Most Popular and Most Recent Tweets"
+  #   ) %>%
+  #   # Cite the data source
+  #   tab_source_note(source_note = "Data from Twitter")
+  # })
 }
 
 # Run the application--------

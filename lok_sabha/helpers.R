@@ -5,13 +5,14 @@
 `%!in%` = Negate(`%in%`)
 
 # Load packages at once
-packages <- c(
+library(easypackages)
+libraries(
   "tidyverse", "leaflet", "tidycensus", "mapview", "sf", "tmap", "tmaptools", 
   "tigris", "ggplot2", "viridis", "ggthemes", "gganimate", "gifski", "shinycssloaders", 
   "transformr", "shinythemes", "lubridate", "shinythemes", "rtweet", "janitor", "tidyr",
   "tidytext", "readr", "wordcloud", "tm", "syuzhet", "gt"
   )
-lapply(packages, require, character.only = TRUE)
+# lapply(packages, require, character.only = TRUE)
 # 2 Data preprocessing------------------------
 orig <- read_csv("twitter_data.csv", col_names = TRUE)
 
@@ -118,13 +119,13 @@ most_pop_words <- most_pop_words %>%
 wordcloud_df <- most_pop_words
 
 # Sentiment analysis
-temp$senti <- get_nrc_sentiment(temp$text)
-tbl <- temp %>% 
-  summarise(Positive = sum(senti$positive), Negative = sum(senti$negative)) %>% 
-  mutate(Total = Positive + Negative)
-tbl <- tbl %>% 
-  gather(key = "Sentiment", value = "Count", Positive:Total) %>% 
-  mutate(Percentage = Count/242540)
+# temp$senti <- get_nrc_sentiment(temp$text)
+# tbl <- temp %>% 
+#   summarise(Positive = sum(senti$positive), Negative = sum(senti$negative)) %>% 
+#   mutate(Total = Positive + Negative)
+# tbl <- tbl %>% 
+#   gather(key = "Sentiment", value = "Count", Positive:Total) %>% 
+#   mutate(Percentage = Count/242540)
 
 
 
