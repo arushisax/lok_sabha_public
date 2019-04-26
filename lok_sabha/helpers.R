@@ -117,6 +117,16 @@ most_pop_words <- most_pop_words %>%
 
 wordcloud_df <- most_pop_words
 
+# Sentiment analysis
+temp$senti <- get_nrc_sentiment(temp$text)
+tbl <- temp %>% 
+  summarise(Positive = sum(senti$positive), Negative = sum(senti$negative)) %>% 
+  mutate(Total = Positive + Negative)
+tbl <- tbl %>% 
+  gather(key = "Sentiment", value = "Count", Positive:Total) %>% 
+  mutate(Percentage = Count/242540)
+
+
 
 
 

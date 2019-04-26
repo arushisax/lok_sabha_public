@@ -67,10 +67,26 @@ ui <-
                               )
                             )
                           )
-                          )
+                          ),
                  
       # TAB 3: --------------------------
-      
+      tabPanel("Sentiments: Summary",
+               sidebarPanel(
+                 helpText(
+                   "This analyzes a mixed sample of 108,000 most popular
+                              and most recent tweets collected from Twitter on 20 March, 2019, 
+                              that tweeted about the BJP's #MainBhiChowkidar ('I am a guard 
+                              of the nation') campaign. This measures the positive and negative sentiments about the Modi-led BJP's #Chowkidar Campaign."
+                 )
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   tabPanel("Sentiments: Summary",
+                            withSpinner(tableOutput("senti_summary"), type = 4)
+                   )
+                 )
+               )
+      )
       # TAB 4: --------------------------
       
     )
@@ -80,8 +96,16 @@ ui <-
 # SERVER-------------   
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  # 1 Ouput About---------
-  output$about <- renderText({"demo"})
+  # 1 OUTPUT About---------
+  
+  output$about <- renderText({
+    "The 2019 Indian general election is currently being held in seven phases 
+    from 11 April to 19 May 2019 to constitute the 17th Lok Sabha. The 
+    counting of votes will be conducted on 23 May, and on the same day
+    the results will be declared. About 900 million Indian citizens are 
+    eligible to vote in one of the seven phases depending on the region"})
+  
+  # 2 OUTPUT wordcloud------
   output$wordcloud <- renderImage({
     list(src = "static/wordcloud.png",
          contentType = 'image/png',
@@ -89,12 +113,28 @@ server <- function(input, output) {
          height = 300
          )
   })
+  # 3 OUTPUT popular words-----
   output$popular_words <- renderImage({
     list(src = "static/popular_words.png",
          contentType = 'image/png',
          width = 400,
          height = 300
     )
+  })
+  # 4 OUTPUT Sentiment analysis----
+  output$senti_summary <- renderTable({
+  tbl %>% 
+    select(Sentiment, Percentage) %>% 
+    gt() %>%  
+    fmt_percent(
+      columns = vars("Percentage")
+    ) %>% 
+    tab_header(
+      title = "Sentiment Analysis of Tweets About the #Chowkidar Campaign",
+      subtitle = "Analyzing a Mixed Sample of 108,000 of the Most Popular and Most Recent Tweets"
+    ) %>%
+    # Cite the data source
+    tab_source_note(source_note = "Data from Twitter")
   })
 }
 
