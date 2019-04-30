@@ -29,6 +29,11 @@ library(syuzhet)
 
 `%!in%` = Negate(`%in%`)
 
+data <- read_rds("x.rds") %>%
+  select(created_at, text, favourites_count, retweet_count) %>%
+  arrange(desc(favourites_count)) %>%
+  top_n(1000) %>%
+  mutate(created_at = hour(created_at))
 
 # UI-----
 ui <-
@@ -52,7 +57,8 @@ ui <-
         tabPanel(
           "The #Chowkidar Campaign",
           mainPanel(tabsetPanel(
-            htmlOutput("chowkidar")
+            tabPanel("About the #Chowkidar Campaign",
+            htmlOutput("chowkidar"))
           ))
           ),
         
@@ -134,9 +140,30 @@ ui <-
                             withSpinner(plotOutput("hourly"), type = 4))
                  ))
         )
-      )
+      ),
+      tabPanel("Fake? Tweets",
+               sidebarLayout(
+                 sidebarPanel(
+                   helpText("Some tweets had the exact same message pasted in them and tweeted again 
+                            and again. This is an analysis of a few of the top (suspected) fake tweets.
+                            Fake tweets are used to both spread misinformation and artificially trend 
+                            chosen hashtags. You can notice that some of these, even more suspiciously, 
+                            had identical retweet and favorite counts at all times in the day."),
+                   radioButtons("text",
+                                "Fake Tweet:", unique(data$text))
+                 ),
+                 # Show a plot of the generated distribution
+                 mainPanel(
+                   tabsetPanel(
+                     tabPanel("Retweets", 
+                              plotOutput("rtPlot")),
+                     tabPanel("Favourites",
+                              plotOutput("favtPlot"))
+                   )
+                 )
+               )
     )
-    )
+    ))
 
 
 # SERVER-------------
@@ -170,7 +197,7 @@ server <- function(input, output) {
   
   # 1 OUTPUT about chowkidar
   output$chowkidar <- renderText({
-    "The incumbent BJP party through the use of the slogan, 'Main bhi Chowkidar' (translated: 'I too am a guard'), began a campaign for the 2019 elections wherein the leaders of the party, by saying that they were a guard of the nation, created a movement wherin lakhs of citizens pledged their support towards the PM's integrity by implying that if the PM is an honest guardian, so will all of them be. This was primarily a twitter campaigns with party leaders inserting 'Guard' in front of their twitter names, tweeting #MainBhiChowkidar, and pushing supporters to do so as well.<br><br> This led to both an increase in public support and mockery of the BJP. In response, the Congress, the opposition party, started a Twitter campaign, 'Chowkidar Chor Hai,' i.e., the guard is the thief."
+    "The incumbent BJP party through the use of the slogan, 'Main bhi Chowkidar' (translated: 'I too am a guard'), began a campaign for the 2019 elections wherein the leaders of the party, by saying that they were a guard of the nation, created a movement wherein lakhs of citizens pledged their support towards prime minister Modi's integrity by implying that if the prime minister is an honest guardian, so will all of them be. This was primarily a twitter campaigns with party leaders inserting 'Guard' in front of their twitter names, tweeting #MainBhiChowkidar, and pushing supporters to do so as well.<br><br> This led to both an increase in public support and mockery of the BJP. In response, the Congress, the opposition party, started a Twitter campaign, 'Chowkidar Chor Hai,' i.e., 'the guard is the thief.'"
   })
   # 2 OUTPUT wordcloud------
   output$wordcloud <- renderImage({
@@ -202,6 +229,7 @@ server <- function(input, output) {
       # Cite the data source
       tab_source_note(source_note = "Data from Twitter")
   })
+  
   output$hourly <- renderPlot({
     plot <- read_rds("plot_1.4.rds")
     temp_plot %>% 
@@ -214,6 +242,45 @@ server <- function(input, output) {
       ) +
       theme_solarized_2(light = FALSE) +
       scale_x_discrete(labels = c("19th-6pm", "", "",  "9pm", "", "", "20th-12am", "", "", "3am", "", "", "6am", "", "", "9am", "",  "", "12pm", "", "", "3pm", "", "", "6pm", "", "",  "9pm", ""))
+  })
+  
+  output$rtPlot <- renderPlot({
+    region_subset <- data %>% filter(!is.na(text), text == input$text)
+    ggplot(region_subset, aes(x = created_at, y = retweet_count)) +
+      geom_col() +
+      geom_point() +
+      theme_wsj() + 
+      theme_solarized_2(light = FALSE) +
+      labs(
+        title = "When the IT Cells Strike Twitter* —
+        Retweet Count for Selected Time",
+        subtitle = "The Indian elections see bot tweeting as a tool to 
+        make messages popular: when in the day were these bots deadliest?",
+        source = "Data scraped from Twitter; 
+        *represents a particular sample, 
+        details @https://github.com/b-hemanth/lok_sabha_campaigns",
+        x = "Hour of the Day",
+        y = "Retweets"
+      )
+  })
+  
+  output$favtPlot <- renderPlot({
+    region_subset <- data %>% filter(!is.na(text), text == input$text)
+    ggplot(region_subset, aes(x = created_at, y = favourites_count)) +
+      geom_col() +
+      geom_point() +
+      theme_solarized_2(light = FALSE) +
+      labs(
+        title = "When the IT Cells Strike Twitter* —
+         Favourites Count for Selected Time",
+        subtitle = "The Indian elections see bot tweeting as a tool to 
+         make messages popular: when in the day were these bots deadliest?",
+        source = "Data scraped from Twitter; 
+         *represents a particular sample, 
+         details @https://github.com/b-hemanth/lok_sabha_campaigns",
+        x = "Hour of the Day",
+        y = "Favourites"
+      )
   })
 }
 
