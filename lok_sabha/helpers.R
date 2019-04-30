@@ -36,7 +36,7 @@ library(gt)
 # lapply(packages, require, character.only = TRUE)
 # 2 Data preprocessing------------------------
 # x <- read_csv("lok_sabha/twitter_data.csv", col_names = TRUE)
-
+# 
 # write_rds(x, "x.rds")
 
 x <- read_rds("lok_sabha/x.rds")
@@ -45,7 +45,7 @@ x <- read_rds("lok_sabha/x.rds")
 # Modify to orig <- read_csv("lok_sabha/twitter_data.csv", col_names = TRUE)
 
 # Duplicate tibble in case I mess up the data
-x <- orig
+orig <- x
 
 # 3 Text preprocessing------------------------
 temp <- x %>%
@@ -111,5 +111,33 @@ tbl <- tbl %>%
   mutate(Percentage = Count / 242540)
 
 write_rds(tbl, "tbl.rds")
+
+# PLOT 1.4
+temp_plot <- temp %>% 
+  mutate(pos = senti$positive, neg = senti$negative) %>% 
+  select(created_at, pos, neg) %>% 
+  gather(key = "Sentiment", value = "Count", pos:neg)
+
+temp_plot$hour <- as.POSIXct(temp_plot$created_at, format="%Y%m%d %H%M%S")
+temp_plot$hour <- format(temp_plot$hour,format='%d.%H')
+
+temp_plot <- aggregate(temp_plot$Count, by=list(Hour=temp_plot$hour, Sentiment=temp_plot$Sentiment), FUN=sum)
+
+temp_plot <- as_tibble(temp_plot) %>% 
+  arrange(Hour) %>% 
+  mutate(Hour = as.numeric(Hour))
+
+temp_plot <- temp_plot %>% 
+  spread(Sentiment, x) %>% 
+  mutate(total = pos + neg) %>% 
+  mutate(Positive = (pos*100)/total, Negative = (neg*100)/total) %>% 
+  select(Hour, Positive, Negative) %>% 
+  gather(key = "Sentiment", value = "Percentage", Positive:Negative)
+
+temp_plot <- temp_plot %>% 
+  mutate(Hour = as.character(Hour)) %>% 
+  filter(Hour != "19.14", Hour != "19.16")
+
+write_rds(temp_plot, "plot_1.4.rds")
 
 

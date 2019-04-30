@@ -49,7 +49,12 @@ ui <-
       navbarMenu(
         "The Public Sentiment",
         
-        
+        tabPanel(
+          "The #Chowkidar Campaign",
+          mainPanel(tabsetPanel(
+            htmlOutput("chowkidar")
+          ))
+          ),
         
         tabPanel(
           "Wordcloud",
@@ -105,11 +110,32 @@ ui <-
             tabPanel("Sentiments: Summary",
                      withSpinner(gt_output("senti_summary"), type = 4))
           ))
-        )
+        ),
         # TAB 4: --------------------------
-        
+        tabPanel("Sentiments as the Day Unravelled",
+                 sidebarPanel(
+                   helpText(
+                     "As I expected, sentiments have been pretty stable though they seem to have 
+                     been more positive on the 19th. What's interesting about this plot is the 
+                     increased negativity and backlash against the campaign starting around
+                     6 am on the 20th in American time. This is interesting because this roughly
+                     coincides with when the news about Nirav Modi's arrest in London was released. 
+                     As you can see from the above wordcloud, words like Nirav Modi and arrest 
+                     immediately become some of the most tweeted words. Now, I expected a generally
+                     positive reaction to Nirav Modi's arrest. However, the data shows that Nirav 
+                     Modi's arrest actually caused an increase in negative tweets
+                     about the #Chowkidar aka #MainBhiChowkidar campaign. A lot of tweeters seemed 
+                     to believe that this is an election stunt and suspected the convenient timing 
+                     of the arrest for the BJP. "
+                   )
+                 ),
+                 mainPanel(tabsetPanel(
+                   tabPanel("Sentiments as the Day Unravelled",
+                            withSpinner(plotOutput("hourly"), type = 4))
+                 ))
+        )
       )
-      )
+    )
     )
 
 
@@ -123,11 +149,29 @@ server <- function(input, output) {
     from 11 April to 19 May 2019 to constitute the 17th Lok Sabha. The
     counting of votes will be conducted on 23 May, and on the same day
     the results will be declared. About 900 million Indian citizens are
-    eligible to vote in one of the seven phases depending on the region. Find
+    eligible to vote in one of the seven phases depending on the region. <br><br>Find
     my code at <a href='https://github.com/b-hemanth/lok_sabha_public'>
-    https://github.com/b-hemanth/lok_sabha_public</a>"
+    https://github.com/b-hemanth/lok_sabha_public</a>.<br><br>What is the data?<br>A mixed sample of the 
+    most popular and most recent one hundred and eight thousand tweets in English from the last 
+    three days (as of 20 March, 2019, 10:07 pm EST) on the Bharatiya Janata Party's 
+    #MainBhiChowkidar campaign.<br><br>A Final Developer's Note:<br> 
+    Unfortunately, there seem to be no existing machine learning based APIs or CRAN packages to
+    deal with Hindi Tweets, so I'm ignoring them. I considered translating and then analyzing, 
+    but this seems to have too broad a confidence interval and Google Translate API is too expensive 
+    for me. This obviously makes this analysis biased to some extent. Furthermore, even for English 
+    sentiment analysis, there is a non-zero margin of error. However, given my rather large sample size, 
+    this margin should be adjusted for. My analysis also does not account for paid tweets. So, 
+    the positive skew might be caused in some party by the BJP tech cell's tweeting. However, 
+    given that I scraped a mixed sample of popular and recent tweets and given that paid tweets 
+    are unlikely to be the most popular ones, this skew should be mitigated. Read more about the skew
+    <a href='https://www.theatlantic.com/international/archive/2019/04/india-misinformation-election-fake-news/586123/'>
+    here</a>."
   })
   
+  # 1 OUTPUT about chowkidar
+  output$chowkidar <- renderText({
+    "The incumbent BJP party through the use of the slogan, 'Main bhi Chowkidar' (translated: 'I too am a guard'), began a campaign for the 2019 elections wherein the leaders of the party, by saying that they were a guard of the nation, created a movement wherin lakhs of citizens pledged their support towards the PM's integrity by implying that if the PM is an honest guardian, so will all of them be. This was primarily a twitter campaigns with party leaders inserting 'Guard' in front of their twitter names, tweeting #MainBhiChowkidar, and pushing supporters to do so as well.<br><br> This led to both an increase in public support and mockery of the BJP. In response, the Congress, the opposition party, started a Twitter campaign, 'Chowkidar Chor Hai,' i.e., the guard is the thief."
+  })
   # 2 OUTPUT wordcloud------
   output$wordcloud <- renderImage({
     list(
@@ -158,7 +202,20 @@ server <- function(input, output) {
       # Cite the data source
       tab_source_note(source_note = "Data from Twitter")
   })
-  }
+  output$hourly <- renderPlot({
+    plot <- read_rds("plot_1.4.rds")
+    temp_plot %>% 
+      ggplot(aes(x = Hour, y = Percentage, fill = Sentiment)) +
+      geom_bar(stat = "identity", alpha = 0.6, color = "black") +
+      labs(
+        title = "Positive and Negative Tweets by Hour",
+        subtitle = "From 6 pm on 19 March to 10 pm on 20 March",
+        x = "Day and Hour of Day in Eastern Standard Time"
+      ) +
+      theme_solarized_2(light = FALSE) +
+      scale_x_discrete(labels = c("19th-6pm", "", "",  "9pm", "", "", "20th-12am", "", "", "3am", "", "", "6am", "", "", "9am", "",  "", "12pm", "", "", "3pm", "", "", "6pm", "", "",  "9pm", ""))
+  })
+}
 
 # Run the application--------
 shinyApp(ui = ui, server = server)
