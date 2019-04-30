@@ -1,26 +1,52 @@
 # A: PREPROCESSING
 
-# 1 Preprocessing----------------------- 
+# 1 Preprocessing-----------------------
 # I like to use this function
 `%!in%` = Negate(`%in%`)
 
 # Load packages at once
-library(easypackages)
-libraries(
-  "tidyverse", "leaflet", "tidycensus", "mapview", "sf", "tmap", "tmaptools", 
-  "tigris", "ggplot2", "viridis", "ggthemes", "gganimate", "gifski", "shinycssloaders", 
-  "transformr", "shinythemes", "lubridate", "shinythemes", "rtweet", "janitor", "tidyr",
-  "tidytext", "readr", "wordcloud", "tm", "syuzhet", "gt"
-  )
+
+library(tidyverse)
+library(leaflet)
+library(tidycensus)
+library(mapview)
+library(sf)
+library(tmap)
+library(tmaptools)
+library(tigris)
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+library(gganimate)
+library(gifski)
+library(shinycssloaders)
+library(transformr)
+library(shinythemes)
+library(lubridate)
+library(shinythemes)
+library(rtweet)
+library(janitor)
+library(tidyr)
+library(tidytext)
+library(readr)
+library(wordcloud)
+library(tm)
+library(syuzhet)
+library(gt)
 # lapply(packages, require, character.only = TRUE)
 # 2 Data preprocessing------------------------
-orig <- read_csv("twitter_data.csv", col_names = TRUE)
+# x <- read_csv("lok_sabha/twitter_data.csv", col_names = TRUE)
+
+# write_rds(x, "x.rds")
+
+x <- read_rds("lok_sabha/x.rds")
 
 # FOR RUNNING THE STATIC
 # Modify to orig <- read_csv("lok_sabha/twitter_data.csv", col_names = TRUE)
 
 # Duplicate tibble in case I mess up the data
 x <- orig
+
 # 3 Text preprocessing------------------------
 temp <- x %>%
   # Lose useless columns
@@ -47,7 +73,7 @@ temp <- x %>%
     bbox_coords,
     followers_count,
     friends_count
-  ) %>% 
+  ) %>%
   # Convert text to lower text
   mutate(text = tolower(text))
 # Note:
@@ -69,65 +95,21 @@ temp$text <- gsub("^ ", "", temp$text)
 temp$text <- gsub(" $", "", temp$text)
 # Remove digits
 temp$text <- gsub('[[:digit:]]+', '', temp$text)
-# Remove stopwords
-data("stop_words")
-# get a list of words
-words <- temp %>%
-  unnest_tokens(word, text) %>%
-  anti_join(stop_words) %>%
-  filter(!word %in% c("rt", "t.co")) 
-## Joining, by = "word"
-
-most_pop_words <- words %>%
-  mutate(likes = favourites_count + retweet_count) %>% 
-  # Removing leftover "&" converted to "amp" from gsub from being counted in the top words
-  filter(word %!in% c(
-    "amp",
-    "airtel",
-    "vodafone",
-    "mobile",
-    "dial",
-    "sms",
-    "users",
-    "caller",
-    "hai",
-    "pe",
-    "aiel",
-    "send",
-    "im",
-    "jio",
-    "phone",
-    "ke",
-    "tune",
-    "main",
-    "ive"
-  )) %>% 
-  group_by(word) %>% 
-  summarise(n = sum(likes)) %>% 
-  arrange(desc(n)) %>% 
-  top_n(120) 
-
-senti <- get_nrc_sentiment(most_pop_words$word)
-
-senti <- tibble::rowid_to_column(senti, "ID")
-most_pop_words <- tibble::rowid_to_column(most_pop_words, "ID")
-
-most_pop_words <- most_pop_words %>% 
-  left_join(senti, by = "ID") %>% 
-  select(-ID)
-
-wordcloud_df <- most_pop_words
 
 # Sentiment analysis
-# temp$senti <- get_nrc_sentiment(temp$text)
-# tbl <- temp %>% 
-#   summarise(Positive = sum(senti$positive), Negative = sum(senti$negative)) %>% 
-#   mutate(Total = Positive + Negative)
-# tbl <- tbl %>% 
-#   gather(key = "Sentiment", value = "Count", Positive:Total) %>% 
-#   mutate(Percentage = Count/242540)
+temp$senti <- get_nrc_sentiment(temp$text)
 
+# WRITE INTO RDS
+write_rds(temp, "temp.rds")
 
+tbl <- temp %>%
+  summarise(Positive = sum(senti$positive),
+            Negative = sum(senti$negative)) %>%
+  mutate(Total = Positive + Negative)
+tbl <- tbl %>%
+  gather(key = "Sentiment", value = "Count", Positive:Total) %>%
+  mutate(Percentage = Count / 242540)
 
+write_rds(tbl, "tbl.rds")
 
 

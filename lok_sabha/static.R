@@ -1,4 +1,56 @@
+# BEFORE RUNNING THE STATIC, you must switch the datafile in helpers.R to include the directory
+
 source("lok_sabha/helpers.R")
+# Remove stopwords
+data("stop_words")
+# get a list of words
+words <- temp %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words) %>%
+  filter(!word %in% c("rt", "t.co"))
+## Joining, by = "word"
+
+most_pop_words <- words %>%
+  mutate(likes = favourites_count + retweet_count) %>%
+  # Removing leftover "&" converted to "amp" from gsub from being counted in the top words
+  filter(
+    word %!in% c(
+      "amp",
+      "airtel",
+      "vodafone",
+      "mobile",
+      "dial",
+      "sms",
+      "users",
+      "caller",
+      "hai",
+      "pe",
+      "aiel",
+      "send",
+      "im",
+      "jio",
+      "phone",
+      "ke",
+      "tune",
+      "main",
+      "ive"
+    )
+  ) %>%
+  group_by(word) %>%
+  summarise(n = sum(likes)) %>%
+  arrange(desc(n)) %>%
+  top_n(120)
+
+senti <- get_nrc_sentiment(most_pop_words$word)
+
+senti <- tibble::rowid_to_column(senti, "ID")
+most_pop_words <- tibble::rowid_to_column(most_pop_words, "ID")
+
+most_pop_words <- most_pop_words %>%
+  left_join(senti, by = "ID") %>%
+  select(-ID)
+
+wordcloud_df <- most_pop_words
 
 # B: PLOTS
 
@@ -19,28 +71,34 @@ source("lok_sabha/helpers.R")
 
 # Rewrite most_pop_words
 
-most_pop_words <- read_csv("lok_sabha/most-pop.csv", col_names = TRUE) %>% 
-  select(word, n, positive, negative) %>% 
-  gather(key = "sentiment", value = "sent_n", positive:negative) %>% 
-  filter(sent_n == 1) %>% 
-  mutate(new_var = ifelse(sentiment == "negative", -n/1000000, n/1000000))
+most_pop_words <-
+  read_csv("lok_sabha/most-pop.csv", col_names = TRUE) %>%
+  select(word, n, positive, negative) %>%
+  gather(key = "sentiment", value = "sent_n", positive:negative) %>%
+  filter(sent_n == 1) %>%
+  mutate(new_var = ifelse(sentiment == "negative",-n / 1000000, n / 1000000))
 
-most_pop_words %>% 
+most_pop_words %>%
   ggplot(aes(reorder(word, new_var), new_var, fill = sentiment)) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
-  geom_hline(yintercept = 0, colour = "white", size = 0.5) +
-  geom_vline(xintercept = 14.5, colour = "white", linetype = "dotted") +
-  labs(
-    y = "Popularity: Favourites + Retweets (in millions)",
-    x = NULL,
-    # title = "Most Popular Negative & Postive \nWords on the #Chowkidar Campaign",
-    # subtitle = "From 108,000 Popular and Recent Tweets \nfrom 20 March, 2019",
-    caption = "*translated from Hinglish"
-  ) +
+  geom_hline(yintercept = 0,
+             colour = "white",
+             size = 0.5) +
+  geom_vline(xintercept = 14.5,
+             colour = "white",
+             linetype = "dotted") +
+  labs(y = "Popularity: Favourites + Retweets (in millions)",
+       x = NULL,
+       # title = "Most Popular Negative & Postive \nWords on the #Chowkidar Campaign",
+       # subtitle = "From 108,000 Popular and Recent Tweets \nfrom 20 March, 2019",
+       caption = "*translated from Hinglish") +
   theme_solarized_2(light = FALSE, base_size = 13)
 
 ggsave("lok_sabha/popular_words.png", plot = last_plot())
+
+# A plot created through the above pipeline is attached in the shiny app
+
 # Generate wordcloud
 # 2 Worlcloud-------------------------
 png("wordcloud.png")
