@@ -145,7 +145,7 @@ ui <-
                sidebarLayout(
                  sidebarPanel(
                    helpText("Some tweets had the exact same message pasted in them and tweeted again 
-                            and again. This is an analysis of a few of the top (suspected) fake tweets.
+                            and again, thousands of times. This is an analysis of a few of these top (suspected) fake tweets.
                             Fake tweets are used to both spread misinformation and artificially trend 
                             chosen hashtags. You can notice that some of these, even more suspiciously, 
                             had identical retweet and favorite counts at all times in the day."),
@@ -244,6 +244,13 @@ server <- function(input, output) {
       scale_x_discrete(labels = c("19th-6pm", "", "",  "9pm", "", "", "20th-12am", "", "", "3am", "", "", "6am", "", "", "9am", "",  "", "12pm", "", "", "3pm", "", "", "6pm", "", "",  "9pm", ""))
   })
   
+# OUTPUT: Fake tweets-------
+  # How do we know these are fake tweets?
+  # Some tweets had the exact same message pasted in them and tweeted again and
+  # again, thousands of times. This is an analysis of a few of the top (suspected) fake tweets. Fake
+  # tweets are used to both spread misinformation and artificially trend chosen
+  # hashtags. You can notice that some of these, even more suspiciously, had
+  # identical retweet and favorite counts at all times in the day.
   output$rtPlot <- renderPlot({
     region_subset <- data %>% filter(!is.na(text), text == input$text)
     ggplot(region_subset, aes(x = created_at, y = retweet_count)) +
