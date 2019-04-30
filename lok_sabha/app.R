@@ -23,6 +23,7 @@ library(tidytext)
 library(readr)
 library(wordcloud)
 library(syuzhet)
+library(gt)
 
 # 1 Preprocessing-----------------------
 # I like to use this function
@@ -34,6 +35,64 @@ data <- read_rds("x.rds") %>%
   arrange(desc(favourites_count)) %>%
   top_n(1000) %>%
   mutate(created_at = hour(created_at))
+
+# GT Function----
+#' render_gt <- function(expr,
+#'                       env = parent.frame(),
+#'                       quoted = FALSE,
+#'                       outputArgs = list()) {
+#'   
+#'   check_shiny()
+#'   
+#'   func <-
+#'     shiny::installExprFunction(
+#'       expr, "func", eval.env = env, quoted = quoted)
+#'   
+#'   shiny::createRenderFunction(
+#'     func,
+#'     function(result, shinysession, name, ...) {
+#'       if (is.null(result)) {
+#'         return(NULL)
+#'       }
+#'       
+#'       html_tbl <- as.tags.gt_tbl(result)
+#'       
+#'       dependencies <- lapply(
+#'         htmltools::resolveDependencies(htmltools::findDependencies(html_tbl)),
+#'         shiny::createWebDependency)
+#'       
+#'       names(dependencies) <- NULL
+#'       
+#'       list(
+#'         html = htmltools::doRenderTags(html_tbl),
+#'         deps = dependencies)
+#'     },
+#'     gt_output, outputArgs
+#'   )
+#' }
+#' 
+#' #' Create a \pkg{gt} display table output element for Shiny
+#' #'
+#' #' @param outputId An output variable from which to read the table.
+#' #' @return A \pkg{gt} table output element that can be included in a panel.
+#' #' @seealso \link{render_gt}()
+#' #' @family Shiny functions
+#' #' @export
+#' gt_output <- function(outputId) {
+#'   
+#'   check_shiny()
+#'   
+#'   shiny::htmlOutput(outputId)
+#' }
+#' 
+#' check_shiny <- function() {
+#'   
+#'   if (!requireNamespace("shiny", quietly = TRUE)) {
+#'     
+#'     stop("Please install the shiny package before using this function\n\n\t",
+#'          "install.packages(\"shiny\")", call. = FALSE)
+#'   }
+#' }
 
 # UI-----
 ui <-
@@ -71,7 +130,7 @@ ui <-
               that tweeted about the BJP's #MainBhiChowkidar ('I am a guard
               of the nation') campaign. This wordcloud shows the hundred most
               tweeted meaningful words and phrases with greater font
-              size indicatin greater frequency of being tweeted."
+              size indicating greater frequency of being tweeted."
             )
             ),
           mainPanel(tabsetPanel(
@@ -175,13 +234,13 @@ server <- function(input, output) {
     "The 2019 Indian general election is currently being held in seven phases
     from 11 April to 19 May 2019 to constitute the 17th Lok Sabha. The
     counting of votes will be conducted on 23 May, and on the same day
-    the results will be declared. About 900 million Indian citizens are
-    eligible to vote in one of the seven phases depending on the region. <br><br>Find
+    the results will be declared. About <b>900 million</b> Indian citizens are
+    eligible to vote in one of the seven phases depending on the region in what is the world's biggest exercise in democracy. <br><br>Find
     my code at <a href='https://github.com/b-hemanth/lok_sabha_public'>
-    https://github.com/b-hemanth/lok_sabha_public</a>.<br><br>What is the data?<br>A mixed sample of the 
+    https://github.com/b-hemanth/lok_sabha_public</a>.<br><br><b>What is the data?</b><br>A mixed sample of the 
     most popular and most recent one hundred and eight thousand tweets in English from the last 
     three days (as of 20 March, 2019, 10:07 pm EST) on the Bharatiya Janata Party's 
-    #MainBhiChowkidar campaign.<br><br>A Final Developer's Note:<br> 
+    #MainBhiChowkidar campaign.<br><br><b>A Final Developer's Note:</b><br> 
     Unfortunately, there seem to be no existing machine learning based APIs or CRAN packages to
     deal with Hindi Tweets, so I'm ignoring them. I considered translating and then analyzing, 
     but this seems to have too broad a confidence interval and Google Translate API is too expensive 
@@ -197,7 +256,7 @@ server <- function(input, output) {
   
   # 1 OUTPUT about chowkidar
   output$chowkidar <- renderText({
-    "The incumbent BJP party through the use of the slogan, 'Main bhi Chowkidar' (translated: 'I too am a guard'), began a campaign for the 2019 elections wherein the leaders of the party, by saying that they were a guard of the nation, created a movement wherein lakhs of citizens pledged their support towards prime minister Modi's integrity by implying that if the prime minister is an honest guardian, so will all of them be. This was primarily a twitter campaigns with party leaders inserting 'Guard' in front of their twitter names, tweeting #MainBhiChowkidar, and pushing supporters to do so as well.<br><br> This led to both an increase in public support and mockery of the BJP. In response, the Congress, the opposition party, started a Twitter campaign, 'Chowkidar Chor Hai,' i.e., 'the guard is the thief.'"
+    "The incumbent BJP party through the use of the slogan, 'Main bhi Chowkidar' (translated: 'I too am a guard'), began a campaign for the 2019 elections wherein the leaders of the party posited that they were guards of the nation. The BJP campaign created a movement wherein lakhs of citizens pledged their support towards prime minister Modi's integrity by implying that if the prime minister is an honest guardian, so are all of them. This was primarily a twitter campaigns with party leaders inserting 'Guard' in front of their twitter names, tweeting #MainBhiChowkidar, and pushing supporters to do so as well.<br><br> This led to both an increase in public support and mockery of the BJP. In response, the Congress, the opposition party, started a Twitter campaign, 'Chowkidar Chor Hai,' i.e., 'the guard is the thief.'"
   })
   # 2 OUTPUT wordcloud------
   output$wordcloud <- renderImage({
@@ -232,7 +291,7 @@ server <- function(input, output) {
   
   output$hourly <- renderPlot({
     plot <- read_rds("plot_1.4.rds")
-    temp_plot %>% 
+    plot %>% 
       ggplot(aes(x = Hour, y = Percentage, fill = Sentiment)) +
       geom_bar(stat = "identity", alpha = 0.6, color = "black") +
       labs(
@@ -260,7 +319,7 @@ server <- function(input, output) {
       theme_solarized_2(light = FALSE) +
       labs(
         title = "When the IT Cells Strike Twitter* —
-        Retweet Count for Selected Time",
+        Retweet Count Across the Hours",
         subtitle = "The Indian elections see bot tweeting as a tool to 
         make messages popular: when in the day were these bots deadliest?",
         source = "Data scraped from Twitter; 
@@ -279,7 +338,7 @@ server <- function(input, output) {
       theme_solarized_2(light = FALSE) +
       labs(
         title = "When the IT Cells Strike Twitter* —
-         Favourites Count for Selected Time",
+         Favourites Count Across the Hours",
         subtitle = "The Indian elections see bot tweeting as a tool to 
          make messages popular: when in the day were these bots deadliest?",
         source = "Data scraped from Twitter; 
