@@ -1,4 +1,20 @@
-# BEFORE RUNNING THE STATIC, you must switch the datafile in helpers.R to include the directory
+# WORKFLOW 
+# There is one main file that powers the app: `app.R` in `/lok_sabha/`.
+# (github.com/b-hemanth/lok_sabha_public/lok_sabha/app.R) There are two other R
+# script files in this same folder, namely: `helpers.R` and `static.R`.
+# `helpers.R` contains much of the preprocessing for the app. It reads in the
+# data, cleans it, does a lot of the text-mining, and does some preliminary
+# sentiment analysis. It pushes out some `.Rds` files and dataframes that are
+# then used in `static.R` to produce the static images. These are those plots
+# that do not employ reactive variables and are not interactive on the final
+# interface. Finally, `../lok_sabha/static/` is the folder that contains the
+# static images produced in the R script files. These static images are then
+# rendered in the Shiny App.
+
+# BEFORE RUNNING THE STATIC, you must switch the datafile in helpers.R to work
+# out of the right directory. This is because when the Shiny App is run, it
+# assumes that the folder of the app.R file is the working directory whereas the
+# regular R script assumes that the upper root directory is the pwd.
 
 source("lok_sabha/helpers.R")
 # Remove stopwords

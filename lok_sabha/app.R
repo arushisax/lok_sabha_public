@@ -1,3 +1,16 @@
+# WORKFLOW 
+# There is one main file that powers the app: `app.R` in `/lok_sabha/`.
+# (github.com/b-hemanth/lok_sabha_public/lok_sabha/app.R) There are two other R
+# script files in this same folder, namely: `helpers.R` and `static.R`.
+# `helpers.R` contains much of the preprocessing for the app. It reads in the
+# data, cleans it, does a lot of the text-mining, and does some preliminary
+# sentiment analysis. It pushes out some `.Rds` files and dataframes that are
+# then used in `static.R` to produce the static images. These are those plots
+# that do not employ reactive variables and are not interactive on the final
+# interface. Finally, `../lok_sabha/static/` is the folder that contains the
+# static images produced in the R script files. These static images are then
+# rendered in the Shiny App.
+
 # Packages----
 `%!in%` = Negate(`%in%`)
 
@@ -247,7 +260,7 @@ server <- function(input, output) {
     for me. This obviously makes this analysis biased to some extent. Furthermore, even for English 
     sentiment analysis, there is a non-zero margin of error. However, given my rather large sample size, 
     this margin should be adjusted for. My analysis also does not account for paid tweets. So, 
-    the positive skew might be caused in some party by the BJP tech cell's tweeting. However, 
+    the positive skew might be caused in some part by the BJP tech cell's tweeting. However, 
     given that I scraped a mixed sample of popular and recent tweets and given that paid tweets 
     are unlikely to be the most popular ones, this skew should be mitigated. Read more about the skew
     <a href='https://www.theatlantic.com/international/archive/2019/04/india-misinformation-election-fake-news/586123/'>
