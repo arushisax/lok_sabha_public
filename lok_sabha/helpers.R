@@ -51,7 +51,7 @@ library(wordcloud)
 library(tm)
 library(syuzhet)
 library(gt)
-# lapply(packages, require, character.only = TRUE)
+
 # 2 Data preprocessing------------------------
 # x <- read_csv("lok_sabha/twitter_data.csv", col_names = TRUE)
 # 
