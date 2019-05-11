@@ -1,4 +1,4 @@
-# WORKFLOW 
+# WORKFLOW
 # There is one main file that powers the app: `app.R` in `/lok_sabha/`.
 # (github.com/b-hemanth/lok_sabha_public/lok_sabha/app.R) There are two other R
 # script files in this same folder, namely: `helpers.R` and `static.R`.
@@ -17,18 +17,25 @@
 # regular R script assumes that the upper root directory is the pwd.
 
 source("lok_sabha/helpers.R")
+
 # Remove stopwords
+
 data("stop_words")
+
 # get a list of words
+
 words <- temp %>%
   unnest_tokens(word, text) %>%
   anti_join(stop_words) %>%
   filter(!word %in% c("rt", "t.co"))
+
 ## Joining, by = "word"
 
 most_pop_words <- words %>%
   mutate(likes = favourites_count + retweet_count) %>%
+  
   # Removing leftover "&" converted to "amp" from gsub from being counted in the top words
+  
   filter(
     word %!in% c(
       "amp",
@@ -92,7 +99,7 @@ most_pop_words <-
   select(word, n, positive, negative) %>%
   gather(key = "sentiment", value = "sent_n", positive:negative) %>%
   filter(sent_n == 1) %>%
-  mutate(new_var = ifelse(sentiment == "negative",-n / 1000000, n / 1000000))
+  mutate(new_var = ifelse(sentiment == "negative", -n / 1000000, n / 1000000))
 
 most_pop_words %>%
   ggplot(aes(reorder(word, new_var), new_var, fill = sentiment)) +
@@ -106,8 +113,10 @@ most_pop_words %>%
              linetype = "dotted") +
   labs(y = "Popularity: Favourites + Retweets (in millions)",
        x = NULL,
+       
        # title = "Most Popular Negative & Postive \nWords on the #Chowkidar Campaign",
        # subtitle = "From 108,000 Popular and Recent Tweets \nfrom 20 March, 2019",
+       
        caption = "*translated from Hinglish") +
   theme_solarized_2(light = FALSE, base_size = 13)
 
@@ -117,6 +126,7 @@ ggsave("lok_sabha/popular_words.png", plot = last_plot())
 
 # Generate wordcloud
 # 2 Worlcloud-------------------------
+
 png("wordcloud.png")
 wordcloud(
   wordcloud_df$word,
@@ -126,5 +136,7 @@ wordcloud(
   random.order = FALSE,
   max.words = 100
 )
+
 dev.off()
+
 # This generates wordcloud.png

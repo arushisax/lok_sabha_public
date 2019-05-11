@@ -65,65 +65,9 @@ data <- read_rds("x.rds") %>%
   top_n(1000) %>%
   mutate(created_at = hour(created_at)) 
 
-# GT Function----
-render_gt <- function(expr,
-                      env = parent.frame(),
-                      quoted = FALSE,
-                      outputArgs = list()) {
-
-  check_shiny()
-
-  func <-
-    shiny::installExprFunction(
-      expr, "func", eval.env = env, quoted = quoted)
-
-  shiny::createRenderFunction(
-    func,
-    function(result, shinysession, name, ...) {
-      if (is.null(result)) {
-        return(NULL)
-      }
-
-      html_tbl <- as.tags.gt_tbl(result)
-
-      dependencies <- lapply(
-        htmltools::resolveDependencies(htmltools::findDependencies(html_tbl)),
-        shiny::createWebDependency)
-
-      names(dependencies) <- NULL
-
-      list(
-        html = htmltools::doRenderTags(html_tbl),
-        deps = dependencies)
-    },
-    gt_output, outputArgs
-  )
-}
-
-#' Create a \pkg{gt} display table output element for Shiny
-#'
-#' @param outputId An output variable from which to read the table.
-#' @return A \pkg{gt} table output element that can be included in a panel.
-#' @seealso \link{render_gt}()
-#' @family Shiny functions
-#' @export
-gt_output <- function(outputId) {
-
-  check_shiny()
-
-  shiny::htmlOutput(outputId)
-}
-
-check_shiny <- function() {
-
-  if (!requireNamespace("shiny", quietly = TRUE)) {
-
-    stop("Please install the shiny package before using this function\n\n\t",
-         "install.packages(\"shiny\")", call. = FALSE)
-  }
-}
 
 # UI-----
+
 ui <-
   shinyUI(
     navbarPage(
@@ -133,13 +77,17 @@ ui <-
       inverse = TRUE,
       windowTitle = "Indian Elections Analysis",
       setBackgroundImage(src = "https://images.assettype.com/thequint%2F2019-01%2Fee2f9fbc-b781-4a0f-8ede-ff7234db38c0%2Fsc2.jpg?q=35&auto=format%2Ccompress&w=960"),
+      
       # TAB 1: About--------------------------
+      
       tabPanel("About",
                mainPanel(
                  h1("2019 Indian Parliamentary Elections: Twitter Data Analysis"),
                  htmlOutput("about")
                )),
+      
       # TAB 2: Sentiment Analysis--------------------------
+      
       navbarMenu(
         "The Public Sentiment",
         
@@ -211,7 +159,7 @@ ui <-
                      been more positive on the 19th. What's interesting about this plot is the 
                      increased negativity and backlash against the campaign starting around
                      6 am on the 20th in American time. This is interesting because this roughly
-                     coincides with when the news about Nirav Modi's arrest in London was released. 
+                     coincides with when the news about white collar criminal Nirav Modi's arrest in London was released. 
                      As you can see from the above wordcloud, words like Nirav Modi and arrest 
                      immediately become some of the most tweeted words. Now, I expected a generally
                      positive reaction to Nirav Modi's arrest. However, the data shows that Nirav 
@@ -227,7 +175,9 @@ ui <-
                  ))
         )
       ),
+      
       # TAB 3: Fake Tweets-----
+      
       tabPanel("Fake? Tweets",
                sidebarLayout(
                  sidebarPanel(
@@ -241,7 +191,9 @@ ui <-
                    radioButtons("text",
                                 "Fake Tweet:", unique(data$text))
                    ),
-                 # Show a plot of the generated distribution
+                
+                  # Show a plot of the generated distribution
+                 
                  mainPanel(tabsetPanel(
                    tabPanel("Retweets",
                             plotOutput("rtPlot")),
@@ -249,17 +201,24 @@ ui <-
                             plotOutput("favtPlot"))
                  ))
                )),
-      # TAB 4: Forecast-----
+     
+       # TAB 4: Forecast-----
+      
       tabPanel("The Twitter Forecast",
                sidebarLayout(
                  sidebarPanel(
                    helpText(
-                     "Mapping pro- and anti-Modi tweets on a map of India."
+                     "Mapping pro- and anti-Modi tweets on a map of India. 
+                     Unfortunately, Twitter India has a weak geo-coding system. 
+                     Hence, only a limited, small sample of tweets could be mapped.
+                     However, this can be expanded once better data becomes available."
                    )),
+                
                  # Show a plot of the generated distribution
+                 
                  mainPanel(tabsetPanel(
                    tabPanel("The Twitter Forecast",
-                            plotOutput("forecastPlot"))
+                            withSpinner(leafletOutput("mymap",height = 1000), type=4))
                  )))
                ))
     )
@@ -267,12 +226,13 @@ ui <-
 
 
 # SERVER-------------
-# Define server logic required to draw a histogram
+
 server <- function(input, output) {
   
   # 1 OUTPUT About
+  
   output$about <- renderText({
-    "<span style='background-color: black'>The 2019 Indian general election is currently being held in seven phases
+    "<span style='background-color: black'><font size='5.2' face = 'Georgia'>The 2019 Indian general election is currently being held in seven phases
     from 11 April to 19 May 2019 to constitute the 17th Lok Sabha. The
     counting of votes will be conducted on 23 May, and on the same day
     the results will be declared. About <b>900 million</b> Indian citizens are
@@ -292,15 +252,17 @@ server <- function(input, output) {
     given that I scraped a mixed sample of popular and recent tweets and given that paid tweets 
     are unlikely to be the most popular ones, this skew should be mitigated. Read more about the skew
     <a href='https://www.theatlantic.com/international/archive/2019/04/india-misinformation-election-fake-news/586123/'>
-    here</a>.</span>"
+    here</a>.</font></span>"
   })
   
   # 2.1 OUTPUT about chowkidar
+  
   output$chowkidar <- renderText({
-    "<span style='background-color: black'>The incumbent BJP party through the use of the slogan, 'Main bhi Chowkidar' (translated: 'I too am a guard'), began a campaign for the 2019 elections wherein the leaders of the party posited that they were guards of the nation. The BJP campaign created a movement wherein lakhs of citizens pledged their support towards prime minister Modi's integrity by implying that if the prime minister is an honest guardian, so are all of them. This was primarily a twitter campaigns with party leaders inserting 'Guard' in front of their twitter names, tweeting #MainBhiChowkidar, and pushing supporters to do so as well.<br><br> This led to both an increase in public support and mockery of the BJP. In response, the Congress, the opposition party, started a Twitter campaign, 'Chowkidar Chor Hai,' i.e., 'the guard is the thief.'</span>"
+    "<span style='background-color: black'><font size='5.2' face = 'Georgia'>The incumbent BJP party through the use of the slogan, 'Main bhi Chowkidar' (translated: 'I too am a guard'), began a campaign for the 2019 elections wherein the leaders of the party posited that they were guards of the nation. The BJP campaign created a movement wherein lakhs of citizens pledged their support towards prime minister Modi's integrity by implying that if the prime minister is an honest guardian, so are all of them. This was primarily a twitter campaigns with party leaders inserting 'Guard' in front of their twitter names, tweeting #MainBhiChowkidar, and pushing supporters to do so as well.<br><br> This led to both an increase in public support and mockery of the BJP. In response, the Congress, the opposition party, started a Twitter campaign, 'Chowkidar Chor Hai,' i.e., 'the guard is the thief.'</font></span>"
   })
   
   # 2.2 OUTPUT wordcloud
+  
   output$wordcloud <- renderImage({
     list(
       src = "static/wordcloud.png",
@@ -311,6 +273,7 @@ server <- function(input, output) {
   })
   
   # 2.3 OUTPUT popular words
+  
   output$popular_words <- renderImage({
     list(
       src = "static/popular_words.png",
@@ -321,6 +284,7 @@ server <- function(input, output) {
   })
   
   # 2.4 OUTPUT Sentiment analysis
+  
   output$senti_summary <- render_gt({
     tbl <- read_rds("tbl.rds")
     tbl %>%
@@ -329,11 +293,14 @@ server <- function(input, output) {
       fmt_percent(columns = vars("Percentage")) %>%
       tab_header(title = "Sentiment Analysis of Tweets About the #Chowkidar Campaign",
                  subtitle = "Analyzing a Mixed Sample of 108,000 of the Most Popular and Most Recent Tweets") %>%
+      
       # Cite the data source
+      
       tab_source_note(source_note = "Data from Twitter")
   })
   
   # 2.5 OUTPUT Hourly Sentiments
+  
   output$hourly <- renderPlot({
     plot <- read_rds("plot_1.4.rds")
     plot %>% 
@@ -357,12 +324,14 @@ server <- function(input, output) {
   # and favorite counts at all times in the day.
   
   # 3.1 Retweets
+  
   output$rtPlot <- renderPlot({
     
     # Using is_retweet and is_quote to judge if fake tweet: By ensuring that a
     # tweet wasn't a quote of another tweet or a RT we ensure that it's the same
     # text that's being copy-pasted by different users
-    region_subset <- data %>% filter(!is.na(text), is_retweet == FALSE, is_quote == FALSE, text == input$text)
+    
+    region_subset <- data %>% filter(!is.na(text), text == input$text)
     ggplot(region_subset, aes(x = created_at, y = retweet_count)) +
       geom_col() +
       geom_point() +
@@ -382,6 +351,7 @@ server <- function(input, output) {
   })
   
   # 3.2 Favourites
+  
   output$favtPlot <- renderPlot({
     region_subset <- data %>% filter(!is.na(text), text == input$text)
     ggplot(region_subset, aes(x = created_at, y = favourites_count)) +
@@ -402,7 +372,9 @@ server <- function(input, output) {
   })
   
   # 4 Forecast Geospatial
-  output$forecastPlot <- renderPlot({
+  
+  output$mymap <- renderLeaflet({
+    
     temp <- read_rds("temp.rds") 
     x <- temp %>% 
       select(text, favourites_count, geo_coords, senti) 
@@ -412,14 +384,17 @@ server <- function(input, output) {
       mutate(lat = as.double(lat), lang = as.double(lang))
     x <- x %>% 
       filter(!is.na(lat), !is.na(lang))
-    ls_shp <- st_as_sf(x, coords =  c("lat", "lang"), crs = 4326)
-    india_shp <- read_sf("india/india-soi154207.shp")
-    ggplot(data = india_shp, aes()) +
-      geom_sf() +
-      geom_sf(data = ls_shp) +
-      theme_solarized_2(light = FALSE)
+    leaflet(data = x) %>%
+      addTiles() %>% 
+      addMarkers(lng = ~lang,
+                 lat = ~lat,
+                 popup = paste("Positive for Modi:", x$senti$positive, "<br>",
+                               "Negative for Modi:", x$senti$negative, "<br>",
+                               "Favorites Count", x$favourites_count, "<br>",
+                               "Text", x$text, "<br>"))
   })
 }
 
 # Run the application--------
+
 shinyApp(ui = ui, server = server)
